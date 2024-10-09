@@ -39,7 +39,6 @@ public class ProduitServiceImpl implements IProduitService {
 		return p;
 	}
 
-	
 
 	@Override
 	public void deleteProduit(Long produitId) {
