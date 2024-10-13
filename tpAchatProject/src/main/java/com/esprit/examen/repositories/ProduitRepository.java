@@ -1,6 +1,7 @@
 package com.esprit.examen.repositories;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,8 +12,9 @@ import com.esprit.examen.entities.Produit;
 @Repository
 public interface ProduitRepository extends JpaRepository<Produit, Long> {
 
-	
-	
+
+    List<Produit> findByStockIdAndCategorieProduitLibelleCategorie(Long stockId, String libelleCategorie);
+
 	
 	
 	

@@ -2,6 +2,7 @@ package com.esprit.examen.services;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,4 +68,14 @@ public class ProduitServiceImpl implements IProduitService {
 	}
 
 
+
+	@Override
+	public List<Produit> findProductsByStockAndCategoryWithLowQuantity(Long stockId, String libelleCategorie) {
+		List<Produit> produits = produitRepository.findByStockIdAndCategorieProduitLibelleCategorie(stockId, libelleCategorie);
+		List<Produit> lowQuantityProducts = produits.stream()
+				.filter(produit -> produit.getQuantite() < 10)
+				.collect(Collectors.toList());
+		lowQuantityProducts.forEach(produit -> log.info("Produit with low quantity: " + produit));
+		return lowQuantityProducts;
+	}
 }

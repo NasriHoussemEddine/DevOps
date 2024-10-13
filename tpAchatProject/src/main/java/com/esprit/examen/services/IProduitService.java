@@ -16,5 +16,5 @@ public interface IProduitService {
 	Produit retrieveProduit(Long id);
 
 	void assignProduitToStock(Long idProduit, Long idStock);
-
+	List<Produit> findProductsByStockAndCategoryWithLowQuantity(Long stockId, String libelleCategorie);
 }
