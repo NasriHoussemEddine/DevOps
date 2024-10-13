@@ -16,17 +16,17 @@ pipeline {
                 // Get code from the specific GitHub repository with credentials and branch
                 git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git', credentialsId : 'github-connection'
 
-                dir('pAchatProject-DevOps') {
+
                     sh "mvn clean package -DskipTests"
-                }
+
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                dir('pAchatProject-DevOps') {
+
                     sh 'docker build -t houssemnasri/houssemnasri1:1.0.0 .'
-                }
+
             }
         }
 
