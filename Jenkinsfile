@@ -50,14 +50,14 @@ pipeline {
                     sh 'docker run -d --name testDevopsProjet houssemnasri/houssemnasri1:1.0.0'
 
                     // Run tests inside the container and capture the output
-                    // Replace 'nvm test' with the actual command to run your tests
-                    def testOutput = sh(script: 'docker exec testDevopsProjet nvm test', returnStdout: true).trim()
+                    // Replace 'mvn test' with the actual command to run your tests
+                    def testOutput = sh(script: 'docker exec testDevopsProjet mvn test', returnStdout: true).trim()
 
                     // Print the test output
                     echo "Test Output:\n${testOutput}"
 
                     // Check the result of the test command
-                    def testResult = sh(script: 'docker exec testDevopsProjet nvm test', returnStatus: true)
+                    def testResult = sh(script: 'docker exec testDevopsProjet mvn test', returnStatus: true)
 
                     if (testResult != 0) {
                         error "Tests failed in the container."
