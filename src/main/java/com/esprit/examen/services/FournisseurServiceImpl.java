@@ -42,8 +42,7 @@ public class FournisseurServiceImpl implements IFournisseurService {
 	public Fournisseur addFournisseur(Fournisseur f /*Master*/) {
 		DetailFournisseur df= new DetailFournisseur();//Slave
 		df.setDateDebutCollaboration(new Date()); //util
-		//On affecte le "Slave" au "Master"
-		f.setDetailFournisseur(df);	
+		f.setDetailFournisseur(df);
 		fournisseurRepository.save(f);
 		return f;
 	}
