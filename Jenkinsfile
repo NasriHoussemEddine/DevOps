@@ -16,7 +16,6 @@ pipeline {
                 // Get code from the specific GitHub repository with credentials and branch
                 git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git', credentialsId: 'github-connection'
 
-                // Build the project, without skipping tests
                 sh "mvn clean package"
             }
         }
