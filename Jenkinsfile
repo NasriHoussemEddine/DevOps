@@ -14,26 +14,22 @@ pipeline {
         stage('Build') {
             steps {
                 // Get code from the specific GitHub repository with credentials and branch
-                git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git', credentialsId : 'github-connection'
+                git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git', credentialsId: 'github-connection'
 
-
-                    sh "mvn clean package -DskipTests"
-
+                // Build the project, without skipping tests
+                sh "mvn clean package"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-
-                    sh 'docker build -t houssemnasri/houssemnasri1:1.0.0 .'
-
+                sh 'docker build -t houssemnasri/houssemnasri1:1.0.0 .'
             }
         }
 
         stage('Docker Login and Push') {
             steps {
                 sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
-
                 sh 'docker push houssemnasri/houssemnasri1:1.0.0'
             }
         }
@@ -50,7 +46,6 @@ pipeline {
                     sh 'docker run -d --name testDevopsProjet houssemnasri/houssemnasri1:1.0.0'
 
                     // Run tests inside the container and capture the output
-                    // Replace 'mvn test' with the actual command to run your tests
                     def testOutput = sh(script: 'docker exec testDevopsProjet mvn test', returnStdout: true).trim()
 
                     // Print the test output
@@ -67,6 +62,7 @@ pipeline {
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 script {
@@ -77,7 +73,4 @@ pipeline {
             }
         }
     }
-
-
-
 }
