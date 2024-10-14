@@ -39,6 +39,13 @@ pipeline {
             }
         }
 
+        stage('Cleanup') {
+                    steps {
+                        sh 'docker rm -f db || true'
+                        sh 'docker rm -f DevopsProjetcontainer || true'
+                    }
+                }
+
        stage('Run Containers and Deploy Application') {
            steps {
                script {
