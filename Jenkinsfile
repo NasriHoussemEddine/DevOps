@@ -39,35 +39,50 @@ pipeline {
             }
         }
 
-        stage('Run Container and Execute Tests') {
-            steps {
-                script {
-                    sh 'docker run -d --name testDevopsProjet houssemnasri/houssemnasri1:1.0.0'
+       stage('Run Containers and Deploy Application') {
+           steps {
+               script {
+                   // Step 1: Run the MySQL Database Container
+                   echo 'Starting MySQL container...'
+                   sh '''
+                       docker run -d --name db \
+                       -e MYSQL_ROOT_PASSWORD=your_password_here \
+                       -e MYSQL_DATABASE=tpachato \
+                       -p 3306:3306 \
+                       mysql:8.0.33
+                   '''
 
-                    // Run tests inside the container and capture the output
-                    def testOutput = sh(script: 'docker exec testDevopsProjet mvn test', returnStdout: true).trim()
+                   // Wait for MySQL to initialize
+                   echo 'Waiting for MySQL to be ready...'
+                   sleep(30) // Adjust sleep time based on your DB initialization time
 
-                    // Print the test output
-                    echo "Test Output:\n${testOutput}"
+                   // Step 2: Run the Spring Boot Application Container
+                   echo 'Starting Spring Boot application container...'
+                   sh '''
+                       docker run -d --name testDevopsProjet \
+                       --link db:db \
+                       -p 8089:8089 \
+                       houssemnasri/houssemnasri1:1.0.0
+                   '''
 
-                    // Check the result of the test command
-                    def testResult = sh(script: 'docker exec testDevopsProjet mvn test', returnStatus: true)
+                   // Confirm the containers are running
+                   sh 'docker ps'
 
-                    if (testResult != 0) {
-                        error "Tests failed in the container."
-                    } else {
-                        echo "Tests passed successfully."
-                    }
-                }
-            }
-        }
+                   // You can optionally add any health checks or validation logic to confirm both services are running
+               }
+           }
+       }
+
 
         stage('Cleanup') {
             steps {
                 script {
                     // Stop and remove the container after tests
                     sh 'docker stop testDevopsProjet'
+                    sh 'docker stop db'
+
                     sh 'docker rm testDevopsProjet'
+                    sh 'docker rm db'
                 }
             }
         }

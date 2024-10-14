@@ -46,6 +46,8 @@ public class ProduitServiceImplTest {
                 .idProduit(1L)  // Product A ID
                 .libelleProduit("Laptop A")  // Product A name (Use 'libelleProduit')
                 .quantite(15)  // Quantity of Product A
+                .codeProduit("a1")
+
                 .prix(1000.0f)  // Price of Product A
                 .stock(stock)  // Associated stock
                 .categorieProduit(categorie)  // Associated category
@@ -54,7 +56,9 @@ public class ProduitServiceImplTest {
         Produit produitB = Produit.builder()
                 .idProduit(2L)  // Product B ID
                 .libelleProduit("Laptop B")  // Product B name
-                .quantite(5)  // Quantity of Product B
+                .quantite(5)// Quantity of Product B
+                .codeProduit("b1")
+
                 .prix(1500.0f)  // Price of Product B
                 .stock(stock)  // Associated stock
                 .categorieProduit(categorie)  // Associated category
@@ -65,6 +69,7 @@ public class ProduitServiceImplTest {
                 .libelleProduit("Laptop C")  // Product C name
                 .quantite(9)  // Quantity of Product C
                 .prix(1200.0f)  // Price of Product C
+                .codeProduit("c1")
                 .stock(stock)  // Associated stock
                 .categorieProduit(categorie)  // Associated category
                 .build();
