@@ -46,7 +46,7 @@ pipeline {
                    echo 'Starting MySQL container...'
                    sh '''
                        docker run -d --name db \
-                       -e MYSQL_ROOT_PASSWORD= \
+                       -e MYSQL_ROOT_PASSWORD=0000 \
                        -e MYSQL_DATABASE=tpachato \
                        -p 3306:3306 \
                        mysql:5.7
@@ -54,7 +54,7 @@ pipeline {
 
                    // Wait for MySQL to initialize
                    echo 'Waiting for MySQL to be ready...'
-                   sleep(30) // Adjust sleep time based on your DB initialization time
+                   sleep(5) // Adjust sleep time based on your DB initialization time
 
                    // Step 2: Run the Spring Boot Application Container
                    echo 'Starting Spring Boot application container...'
