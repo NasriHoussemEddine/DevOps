@@ -60,8 +60,7 @@ pipeline {
                    echo 'Starting Spring Boot application container...'
                    sh '''
                        docker run -d --name DevopsProjetcontainer \
-                       --link db:db \
-                       -p 8089:8089 \
+                      -p 8089:8089 \
                        houssemnasri/houssemnasri1:1.0.0
                    '''
 
