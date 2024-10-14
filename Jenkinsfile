@@ -59,7 +59,7 @@ pipeline {
                    // Step 2: Run the Spring Boot Application Container
                    echo 'Starting Spring Boot application container...'
                    sh '''
-                       docker run -d --name testDevopsProjet \
+                       docker run -d --name DevopsProjetcontainer \
                        --link db:db \
                        -p 8089:8089 \
                        houssemnasri/houssemnasri1:1.0.0
@@ -78,11 +78,11 @@ pipeline {
             steps {
                 script {
                     // Stop and remove the container after tests
-                    sh 'docker stop testDevopsProjet'
-                    sh 'docker stop db'
+                    //sh 'docker stop testDevopsProjet'
+                    //sh 'docker stop db'
 
-                    sh 'docker rm testDevopsProjet'
-                    sh 'docker rm db'
+                    //sh 'docker rm testDevopsProjet'
+                    //sh 'docker rm db'
                 }
             }
         }
