@@ -72,19 +72,5 @@ pipeline {
                }
            }
        }
-
-
-        stage('Cleanup') {
-            steps {
-                script {
-                    // Stop and remove the container after tests
-                    //sh 'docker stop testDevopsProjet'
-                    //sh 'docker stop db'
-
-                    //sh 'docker rm testDevopsProjet'
-                    //sh 'docker rm db'
-                }
-            }
-        }
     }
 }
