@@ -46,10 +46,10 @@ pipeline {
                    echo 'Starting MySQL container...'
                    sh '''
                        docker run -d --name db \
-                       -e MYSQL_ROOT_PASSWORD=your_password_here \
+                       -e MYSQL_ROOT_PASSWORD= \
                        -e MYSQL_DATABASE=tpachato \
                        -p 3306:3306 \
-                       mysql:8.0.33
+                       mysql:5.7
                    '''
 
                    // Wait for MySQL to initialize
