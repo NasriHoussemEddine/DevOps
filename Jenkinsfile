@@ -6,15 +6,17 @@ pipeline {
     }
 
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
-        GITHUB_CREDENTIALS = credentials('github-connection')
+        //DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
+        //GITHUB_CREDENTIALS = credentials('github-connection')
+          DOCKER_HUB_TOKEN = credentials('docker-hub-key')
+          GITHUB_TOKEN = credentials('github-token')
     }
 
     stages {
         stage('Build') {
             steps {
                 // Get code from the specific GitHub repository with credentials and branch
-                git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git', credentialsId: 'github-connection'
+                git branch: 'main', url: 'https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git'
 
                 sh "mvn clean package"
             }
@@ -28,7 +30,7 @@ pipeline {
 
         stage('Docker Login and Push') {
             steps {
-                sh 'echo $DOCKER_HUB_CREDENTIALS_PSW | docker login -u $DOCKER_HUB_CREDENTIALS_USR --password-stdin'
+                sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin'
                 sh 'docker push houssemnasri/houssemnasri1:1.0.0'
             }
         }
