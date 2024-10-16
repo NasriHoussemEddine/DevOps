@@ -65,7 +65,7 @@ public class ProduitServiceImplTest {
                 .build();
 
         Produit produitC = Produit.builder()
-                .idProduit(3L)  // Product C ID
+                .idProduit(3L)
                 .libelleProduit("Laptop C")  // Product C name
                 .quantite(9)  // Quantity of Product C
                 .prix(1200.0f)  // Price of Product C
