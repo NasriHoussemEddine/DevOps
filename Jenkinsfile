@@ -75,7 +75,6 @@ pipeline {
                    // Confirm the containers are running
                    sh 'docker ps'
 
-                   // You can optionally add any health checks or validation logic to confirm both services are running
                }
            }
        }
