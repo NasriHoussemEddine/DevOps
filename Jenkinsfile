@@ -15,7 +15,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                // Get code from the specific GitHub repository with credentials and branch
                 git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
                 sh "mvn clean package"
             }
