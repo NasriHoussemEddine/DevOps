@@ -8,6 +8,8 @@ pipeline {
     environment {
         //DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
         //GITHUB_CREDENTIALS = credentials('github-connection')
+        VM_IP = '192.168.157.146' // You can set this dynamically or via Jenkins configuration
+                VM_PORT = '8081'          // You can set this dynamically or via Jenkins configuration
           DOCKER_HUB_TOKEN = credentials('docker-hub-key')
           GITHUB_TOKEN = credentials('github-token')
     }
@@ -16,24 +18,25 @@ pipeline {
 
     stages {
 
-    stage('Check Environment Variables') {
-        steps {
-            script {
-         git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
 
-                echo "VM_IP: ${VM_IP}"
-                echo "VM_PORT: ${VM_PORT}"
-            }
-        }
-    }
-        stage('Build') {
-            steps {
-                sh "mvn clean package"
-            }
-        }
-        stage('Deploy to Nexus') {
+        stages {
+                stage('Checkout') {
                     steps {
-                        sh 'mvn deploy'
+                        git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
+                    }
+                }
+
+                stage('Build') {
+                    steps {
+                        // Pass the VM_IP and VM_PORT as system properties to Maven
+                        sh "mvn clean package -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+                    }
+                }
+
+                stage('Deploy to Nexus') {
+                    steps {
+                        // Pass the VM_IP and VM_PORT as system properties to Maven
+                        sh "mvn deploy -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
                     }
                 }
 
