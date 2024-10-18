@@ -26,7 +26,20 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+			<vm.ip>${vm.ip}</vm.ip>
+			<vm.port>${vm.port}</vm.port>
 	</properties>
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<url>http://${vm.ip}:${vm.port}/repository/maven-releases-houcem/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<url>http://${vm.ip}:${vm.port}/repository/maven-snapshots-houcem/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
