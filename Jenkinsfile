@@ -19,6 +19,8 @@ pipeline {
     stage('Check Environment Variables') {
         steps {
             script {
+         git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
+
                 echo "VM_IP: ${VM_IP}"
                 echo "VM_PORT: ${VM_PORT}"
             }
@@ -26,7 +28,6 @@ pipeline {
     }
         stage('Build') {
             steps {
-                git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
                 sh "mvn clean package"
             }
         }
