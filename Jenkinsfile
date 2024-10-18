@@ -12,7 +12,18 @@ pipeline {
           GITHUB_TOKEN = credentials('github-token')
     }
 
+
+
     stages {
+
+    stage('Check Environment Variables') {
+        steps {
+            script {
+                echo "VM_IP: ${VM_IP}"
+                echo "VM_PORT: ${VM_PORT}"
+            }
+        }
+    }
         stage('Build') {
             steps {
                 git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
