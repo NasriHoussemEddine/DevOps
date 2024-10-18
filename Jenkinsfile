@@ -20,6 +20,11 @@ pipeline {
                 sh "mvn clean package"
             }
         }
+        stage('Deploy to Nexus') {
+                    steps {
+                        sh 'mvn deploy'
+                    }
+                }
 
         stage('Build Docker Image') {
             steps {
