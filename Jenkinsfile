@@ -19,8 +19,7 @@ pipeline {
     stages {
 
 
-        stages {
-                stage('Checkout') {
+              stage('Checkout') {
                     steps {
                         git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
                     }
