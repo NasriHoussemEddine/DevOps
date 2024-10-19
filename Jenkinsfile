@@ -35,7 +35,7 @@ pipeline {
                 stage('Deploy to Nexus') {
                     steps {
                         // Pass the VM_IP and VM_PORT as system properties to Maven
-                        sh "mvn deploy -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+                        sh "mvn deploy -DrepositoryId=nexus-releases-houcem -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
                     }
                 }
 
