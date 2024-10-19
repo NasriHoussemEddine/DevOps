@@ -31,11 +31,11 @@
 	</properties>
 	<distributionManagement>
 		<repository>
-			<id>nexus-releases</id>
+			<id>nexus-releases-houcem</id>
 			<url>http://192.168.157.146:8081/repository/maven-releases-houcem/</url>
 		</repository>
 		<snapshotRepository>
-			<id>nexus-snapshots</id>
+			<id>nexus-snapshots-houcem</id>
 			<url>http://192.168.157.146:8081/repository/maven-snapshots-houcem/</url>
 		</snapshotRepository>
 	</distributionManagement>
