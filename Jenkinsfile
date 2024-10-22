@@ -6,47 +6,39 @@ pipeline {
     }
 
     environment {
-        //DOCKER_HUB_CREDENTIALS = credentials('dockerhub')
-        //GITHUB_CREDENTIALS = credentials('github-connection')
-        VM_IP = '192.168.157.146' // You can set this dynamically or via Jenkins configuration
-                VM_PORT = '8081'          // You can set this dynamically or via Jenkins configuration
-          DOCKER_HUB_TOKEN = credentials('docker-hub-key')
-          GITHUB_TOKEN = credentials('github-token')
-          SONAR_TOKEN = credentials('sonarqube2')
-
+        VM_IP = '192.168.157.146' // Set dynamically or via Jenkins configuration
+        VM_PORT = '8081'          // Set dynamically or via Jenkins configuration
+        DOCKER_HUB_TOKEN = credentials('docker-hub-key')
+        GITHUB_TOKEN = credentials('github-token')
+        SONAR_TOKEN = credentials('sonarqube2')
     }
 
-
-
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
+            }
+        }
 
+        stage('SonarQube') {
+            steps {
+                sh 'mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=http://192.168.157.146:9000 -Dsonar.login=$SONAR_TOKEN'
+            }
+        }
 
-              stage('Checkout') {
-                    steps {
-                        git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
-                    }
-                }
+        stage('Build') {
+            steps {
+                // Pass the VM_IP and VM_PORT as system properties to Maven
+                sh "mvn clean package -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+            }
+        }
 
-                 stage('SonarQube') {
-                            steps {
-                            sh 'mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=http://192.168.157.146:9000 -Dsonar.login=$SONAR_TOKEN'
-                                }
-                            }
-                        }
-
-                stage('Build') {
-                    steps {
-                        // Pass the VM_IP and VM_PORT as system properties to Maven
-                        sh "mvn clean package -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
-                    }
-                }
-
-                stage('Deploy to Nexus') {
-                    steps {
-                        // Pass the VM_IP and VM_PORT as system properties to Maven
-                        sh "mvn deploy -DrepositoryId=nexus-releases-houcem -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
-                    }
-                }
+        stage('Deploy to Nexus') {
+            steps {
+                // Pass the VM_IP and VM_PORT as system properties to Maven
+                sh "mvn deploy -DrepositoryId=nexus-releases-houcem -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -68,42 +60,41 @@ pipeline {
         }
 
         stage('Cleanup') {
-                    steps {
-                        sh 'docker rm -f db || true'
-                        sh 'docker rm -f DevopsProjetcontainer || true'
-                    }
+            steps {
+                sh 'docker rm -f db || true'
+                sh 'docker rm -f DevopsProjetcontainer || true'
+            }
+        }
+
+        stage('Run Containers and Deploy Application') {
+            steps {
+                script {
+                    // Step 1: Run the MySQL Database Container
+                    echo 'Starting MySQL container...'
+                    sh '''
+                        docker run -d --name db \
+                        -e MYSQL_ROOT_PASSWORD=0000 \
+                        -e MYSQL_DATABASE=tpachato \
+                        -p 3306:3306 \
+                        mysql:5.7
+                    '''
+
+                    // Wait for MySQL to initialize
+                    echo 'Waiting for MySQL to be ready...'
+                    sleep(5) // Adjust sleep time based on your DB initialization time
+
+                    // Step 2: Run the Spring Boot Application Container
+                    echo 'Starting Spring Boot application container...'
+                    sh '''
+                        docker run -d --name DevopsProjetcontainer \
+                        -p 8089:8089 \
+                        houssemnasri/houssemnasri1:1.0.0
+                    '''
+
+                    // Confirm the containers are running
+                    sh 'docker ps'
                 }
-
-       stage('Run Containers and Deploy Application') {
-           steps {
-               script {
-                   // Step 1: Run the MySQL Database Container
-                   echo 'Starting MySQL container...'
-                   sh '''
-                       docker run -d --name db \
-                       -e MYSQL_ROOT_PASSWORD=0000 \
-                       -e MYSQL_DATABASE=tpachato \
-                       -p 3306:3306 \
-                       mysql:5.7
-                   '''
-
-                   // Wait for MySQL to initialize
-                   echo 'Waiting for MySQL to be ready...'
-                   sleep(5) // Adjust sleep time based on your DB initialization time
-
-                   // Step 2: Run the Spring Boot Application Container
-                   echo 'Starting Spring Boot application container...'
-                   sh '''
-                       docker run -d --name DevopsProjetcontainer \
-                      -p 8089:8089 \
-                       houssemnasri/houssemnasri1:1.0.0
-                   '''
-
-                   // Confirm the containers are running
-                   sh 'docker ps'
-
-               }
-           }
-       }
+            }
+        }
     }
 }
