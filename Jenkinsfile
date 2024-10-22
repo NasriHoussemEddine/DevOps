@@ -12,6 +12,8 @@ pipeline {
                 VM_PORT = '8081'          // You can set this dynamically or via Jenkins configuration
           DOCKER_HUB_TOKEN = credentials('docker-hub-key')
           GITHUB_TOKEN = credentials('github-token')
+          SONAR_TOKEN = credentials('sonarqube2')
+
     }
 
 
@@ -24,6 +26,13 @@ pipeline {
                         git branch: 'main', url: "https://${GITHUB_TOKEN}@github.com/NasriHoussemEddine/DevOps.git"
                     }
                 }
+
+                 stage('SonarQube') {
+                            steps {
+                            sh 'mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=http://192.168.157.146:9000 -Dsonar.login=$SONAR_TOKEN'
+                                }
+                            }
+                        }
 
                 stage('Build') {
                     steps {
