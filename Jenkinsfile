@@ -14,6 +14,11 @@ pipeline {
         url_sonar = 'http://192.168.157.146:9000'
         NEXUS_DOCKER_REPO = "http://${VM_IP}:${VM_PORT}/repository/docker-repo/"
         VERSION = "" // Variable for the version tag
+        JAR_FILE = "" // Variable to hold the name of the latest jar file
+
+        // Add Nexus credentials
+        NEXUS_USERNAME = 'admin'
+        NEXUS_PASSWORD = '0000'
     }
 
     stages {
@@ -33,37 +38,57 @@ pipeline {
             steps {
                 sh "mvn clean package"
                 script {
-                    // Récupérer la version Maven depuis le fichier pom.xml
+                    // Get the project version from pom.xml
                     VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
                     echo "Project version is ${VERSION}"
                 }
             }
         }
 
-        stage('Deploy to Nexus') {
+        stage('Get Latest JAR File') {
             steps {
-                sh "mvn deploy -DrepositoryId=nexus-releases-houcem"
+                script {
+                    // Get the latest JAR file in the target directory
+                    JAR_FILE = sh(script: "ls -t target/*.jar | head -n 1", returnStdout: true).trim()
+                    echo "Latest JAR file is ${JAR_FILE}"
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t houssemnasri/houssemnasri1:${VERSION} ."
+                // Build the Docker image
+                sh "docker build --build-arg JAR_FILE=${JAR_FILE} -t houssemnasri/houssemnasri1:${VERSION} ."
+            }
+        }
+
+        stage('Deploy Docker Image to Nexus') {
+            steps {
+                script {
+                    // Login to Nexus Docker repository using Nexus credentials
+                    sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_REPO}"
+
+                    // Tagging the Docker image for Nexus
+                    sh "docker tag houssemnasri/houssemnasri1:${VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
+
+                    // Pushing the image to the Nexus repository
+                    sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
+                }
             }
         }
 
         stage('Docker Login and Push to Docker Hub') {
             steps {
-                sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin'
-                sh "docker push houssemnasri/houssemnasri1:${VERSION}"
-            }
-        }
+                script {
+                    // Login to Docker Hub
+                    sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin'
 
-        stage('Docker Login and Push to Nexus') {
-            steps {
-                sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin ${NEXUS_DOCKER_REPO}'
-                sh "docker tag houssemnasri/houssemnasri1:${VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
-                sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
+                    // Tagging the Docker image for Docker Hub
+                    sh "docker tag houssemnasri/houssemnasri1:${VERSION} houssemnasri/houssemnasri1:${VERSION}"
+
+                    // Pushing the image to Docker Hub
+                    sh "docker push houssemnasri/houssemnasri1:${VERSION}"
+                }
             }
         }
 
@@ -72,5 +97,11 @@ pipeline {
                 sh "docker pull houssemnasri/houssemnasri1:${VERSION}"
             }
         }
-  }
+        stage('Start Docker Compose') {
+                    steps {
+                        // Exécutez Docker Compose à partir du répertoire du projet Jenkins
+                        sh "docker-compose -f ./up -d"
+                    }
+                }
+    }
 }
