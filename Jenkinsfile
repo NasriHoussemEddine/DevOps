@@ -11,6 +11,9 @@ pipeline {
         DOCKER_HUB_TOKEN = credentials('docker-hub-key')
         GITHUB_TOKEN = credentials('github-token')
         SONAR_TOKEN = credentials('sonarqube2')
+        url_sonar = 'http://192.168.157.146:9000'
+        NEXUS_DOCKER_REPO = "http://${VM_IP}:${VM_PORT}/repository/docker-repo/"
+        VERSION = "" // Variable for the version tag
     }
 
     stages {
@@ -22,79 +25,53 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=http://192.168.157.146:9000 -Dsonar.login=$SONAR_TOKEN'
+                sh "mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=${url_sonar} -Dsonar.login=$SONAR_TOKEN"
             }
         }
 
         stage('Build') {
             steps {
-                // Pass the VM_IP and VM_PORT as system properties to Maven
-                sh "mvn clean package -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+                sh "mvn clean package"
+                script {
+                    // Récupérer la version Maven depuis le fichier pom.xml
+                    VERSION = sh(script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout", returnStdout: true).trim()
+                    echo "Project version is ${VERSION}"
+                }
             }
         }
 
         stage('Deploy to Nexus') {
             steps {
-                // Pass the VM_IP and VM_PORT as system properties to Maven
-                sh "mvn deploy -DrepositoryId=nexus-releases-houcem -Dvm.ip=${VM_IP} -Dvm.port=${VM_PORT}"
+                sh "mvn deploy -DrepositoryId=nexus-releases-houcem"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t houssemnasri/houssemnasri1:1.0.0 .'
+                // Utiliser la version Maven comme tag de l'image Docker
+                sh "docker build -t houssemnasri/houssemnasri1:${VERSION} ."
             }
         }
 
-        stage('Docker Login and Push') {
+        stage('Docker Login and Push to Docker Hub') {
             steps {
                 sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin'
-                sh 'docker push houssemnasri/houssemnasri1:1.0.0'
+                sh "docker push houssemnasri/houssemnasri1:${VERSION}"
+            }
+        }
+
+        stage('Docker Login and Push to Nexus') {
+            steps {
+                sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin ${NEXUS_DOCKER_REPO}'
+                sh "docker tag houssemnasri/houssemnasri1:${VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
+                sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
             }
         }
 
         stage('Pull Docker Image') {
             steps {
-                sh 'docker pull houssemnasri/houssemnasri1:1.0.0'
+                sh "docker pull houssemnasri/houssemnasri1:${VERSION}"
             }
         }
-
-        stage('Cleanup') {
-            steps {
-                sh 'docker rm -f db || true'
-                sh 'docker rm -f DevopsProjetcontainer || true'
-            }
-        }
-
-        stage('Run Containers and Deploy Application') {
-            steps {
-                script {
-                    // Step 1: Run the MySQL Database Container
-                    echo 'Starting MySQL container...'
-                    sh '''
-                        docker run -d --name db \
-                        -e MYSQL_ROOT_PASSWORD=0000 \
-                        -e MYSQL_DATABASE=tpachato \
-                        -p 3306:3306 \
-                        mysql:5.7
-                    '''
-
-                    // Wait for MySQL to initialize
-                    echo 'Waiting for MySQL to be ready...'
-                    sleep(5) // Adjust sleep time based on your DB initialization time
-
-                    // Step 2: Run the Spring Boot Application Container
-                    echo 'Starting Spring Boot application container...'
-                    sh '''
-                        docker run -d --name DevopsProjetcontainer \
-                        -p 8089:8089 \
-                        houssemnasri/houssemnasri1:1.0.0
-                    '''
-
-                    // Confirm the containers are running
-                    sh 'docker ps'
-                }
-            }
-        }
-    }
+  }
 }
