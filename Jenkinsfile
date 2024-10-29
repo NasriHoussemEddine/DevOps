@@ -48,7 +48,6 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Utiliser la version Maven comme tag de l'image Docker
                 sh "docker build -t houssemnasri/houssemnasri1:${VERSION} ."
             }
         }
