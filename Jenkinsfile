@@ -48,7 +48,6 @@ pipeline {
         stage('Get Latest JAR File') {
             steps {
                 script {
-                    // Get the latest JAR file in the target directory
                     JAR_FILE = sh(script: "ls -t target/*.jar | head -n 1", returnStdout: true).trim()
                     echo "Latest JAR file is ${JAR_FILE}"
                 }
