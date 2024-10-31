@@ -12,7 +12,7 @@ pipeline {
         GITHUB_TOKEN = credentials('github-token')
         SONAR_TOKEN = credentials('sonarqube2')
         URL_SONAR = 'http://192.168.157.146:9000'
-        NEXUS_DOCKER_REPO = "http://192.168.157.146:8081/repository/backend-repo/"
+        NEXUS_DOCKER_REPO = "http://192.168.157.146:8081/repository/backend-repo"
         VERSION = ""
         JAR_FILE = ""
 
@@ -66,9 +66,9 @@ pipeline {
                 script {
                     // Login to Nexus Docker repository using Nexus credentials
                     //sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_REPO}"
-                    sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://${VM_IP}:${VM_PORT}/repository/maven-releases -Dusername=${NEXUS_USERNAME} -Dpassword=${NEXUS_PASSWORD}"
+                    sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://${VM_IP}:${VM_PORT}/repository/nexus-releases-houcem -Dusername=${NEXUS_USERNAME} -Dpassword=${NEXUS_PASSWORD}"
                     sh "docker tag houssemnasri/houssemnasri1:${VERSION} http://192.168.157.146:8081/repository/backend-repo/houssemnasri/houssemnasri1:${VERSION}"
-                    sh "docker push http://192.168.157.146:8081/repository/backend-repo/houssemnasri/houssemnasri1:${VERSION}"
+                    sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
 
                 }
             }
