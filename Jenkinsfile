@@ -6,8 +6,8 @@ pipeline {
     }
 
     environment {
-        VM_IP = '192.168.157.146' // Set dynamically or via Jenkins configuration
-        VM_PORT = '8081'          // Set dynamically or via Jenkins configuration
+        VM_IP = '192.168.157.146'
+        VM_PORT = '8081'
         DOCKER_HUB_TOKEN = credentials('docker-hub-key')
         GITHUB_TOKEN = credentials('github-token')
         SONAR_TOKEN = credentials('sonarqube2')
@@ -16,9 +16,9 @@ pipeline {
         VERSION = ""
         JAR_FILE = ""
 
-        // Add Nexus credentials
+
         NEXUS_USERNAME = 'admin'
-        NEXUS_PASSWORD = 'admin123'
+        NEXUS_PASSWORD = '0000'
     }
 
     stages {
