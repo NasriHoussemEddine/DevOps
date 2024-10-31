@@ -31,7 +31,7 @@
 		</repository>
 		<snapshotRepository>
 			<id>nexus-snapshots-houcem</id>
-			<url>http://${vm.ip}:${vm.port}/repository/maven-snapshots-houcem/</url>
+			<url>http://${vm.ip}:${vm.port}/repository/nexus-snapshots-houcem/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
