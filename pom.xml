@@ -27,7 +27,7 @@
 	<distributionManagement>
 		<repository>
 			<id>nexus-releases-houcem</id>
-			<url>http://${vm.ip}:${vm.port}/repository/maven-releases-houcem/</url>
+			<url>http://${vm.ip}:${vm.port}/repository/nexus-releases-houcem/</url>
 		</repository>
 		<snapshotRepository>
 			<id>nexus-snapshots-houcem</id>
