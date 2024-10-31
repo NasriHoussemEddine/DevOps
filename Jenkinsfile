@@ -18,7 +18,7 @@ pipeline {
 
         // Add Nexus credentials
         NEXUS_USERNAME = 'admin'
-        NEXUS_PASSWORD = '0000'
+        NEXUS_PASSWORD = 'admin123'
     }
 
     stages {
