@@ -11,10 +11,10 @@ pipeline {
         DOCKER_HUB_TOKEN = credentials('docker-hub-key')
         GITHUB_TOKEN = credentials('github-token')
         SONAR_TOKEN = credentials('sonarqube2')
-        url_sonar = 'http://192.168.157.146:9000'
+        URL_SONAR = 'http://192.168.157.146:9000'
         NEXUS_DOCKER_REPO = "http://${VM_IP}:${VM_PORT}/repository/docker-repo/"
-        VERSION = "" // Variable for the version tag
-        JAR_FILE = "" // Variable to hold the name of the latest jar file
+        VERSION = ""
+        JAR_FILE = ""
 
         // Add Nexus credentials
         NEXUS_USERNAME = 'admin'
@@ -30,7 +30,7 @@ pipeline {
 
         stage('SonarQube') {
             steps {
-                sh "mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=${url_sonar} -Dsonar.login=$SONAR_TOKEN"
+                sh "mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=${URL_SONAR} -Dsonar.login=$SONAR_TOKEN"
             }
         }
 
