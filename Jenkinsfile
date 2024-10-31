@@ -12,7 +12,7 @@ pipeline {
         GITHUB_TOKEN = credentials('github-token')
         SONAR_TOKEN = credentials('sonarqube2')
         URL_SONAR = 'http://192.168.157.146:9000'
-        NEXUS_DOCKER_REPO = "http://${VM_IP}:${VM_PORT}/repository/docker-repo/"
+        NEXUS_DOCKER_REPO = "http://${VM_IP}:${VM_PORT}/repository/backend-repo/"
         VERSION = ""
         JAR_FILE = ""
 
@@ -96,11 +96,11 @@ pipeline {
                 sh "docker pull houssemnasri/houssemnasri1:${VERSION}"
             }
         }
-        stage('Start Docker Compose') {
+       /*  stage('Start Docker Compose') {
                     steps {
                         // Exécutez Docker Compose à partir du répertoire du projet Jenkins
                         sh "docker-compose -f ./up -d"
                     }
-                }
+                } */
     }
 }
