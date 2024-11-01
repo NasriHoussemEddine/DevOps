@@ -66,7 +66,7 @@ pipeline {
                 script {
                     // Login to Nexus Docker repository using Nexus credentials
                     //sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_REPO}"
-                    sh "mvn deploy -DaltDeploymentRepository=nexus-releases-houcem::default::http://${env.VM_IP}:${env.VM_PORT}/repository/"
+                    sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://${env.VM_IP}:${env.VM_PORT}/repository/nexus-releases-houcem/  -Dnexus.username=${NEXUS_USERNAME} -Dnexus.password=${NEXUS_PASSWORD}"
                     sh "docker tag houssemnasri/houssemnasri1:${VERSION} http://192.168.157.146:8081/repository/backend-repo/houssemnasri/houssemnasri1:${VERSION}"
                     sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri/houssemnasri1:${VERSION}"
 
