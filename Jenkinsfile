@@ -64,7 +64,6 @@ pipeline {
         stage('Deploy Docker Image to Nexus') {
             steps {
                 script {
-                    // Login to Nexus Docker repository using Nexus credentials
                     sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin http://${env.VM_IP}:${env.VM_PORT}/repository/nexus-releases-houcem/"
 
                     sh "mvn deploy -DaltDeploymentRepository=nexus::default::http://${env.VM_IP}:${env.VM_PORT}/repository/nexus-releases-houcem/  -Dnexus.username=${NEXUS_USERNAME} -Dnexus.password=${NEXUS_PASSWORD}"
@@ -78,10 +77,8 @@ pipeline {
         stage('Docker Login and Push to Docker Hub') {
             steps {
                 script {
-                    // Login to Docker Hub
                     sh 'echo $DOCKER_HUB_TOKEN | docker login -u houssemnasri --password-stdin'
 
-                    // Tagging the Docker image for Docker Hub
                     sh "docker tag houssemnasri/houssemnasri1:${VERSION} houssemnasri/houssemnasri1:${VERSION}"
 
                     // Pushing the image to Docker Hub
