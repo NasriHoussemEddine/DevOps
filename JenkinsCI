@@ -1,0 +1,89 @@
+pipeline {
+    agent any
+
+    tools {
+        maven "Maven"
+    }
+
+    environment {
+        DOCKER_HUB_TOKEN = credentials('docker-hub-key')
+        GITHUB_TOKEN = credentials('token2')
+        SONAR_TOKEN = credentials('sonarqube2')
+        URL_SONAR = 'http://192.168.157.146:9000'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '>>> Starting the Checkout Stage: Cloning the repository from GitHub...'
+                git branch: 'main', url: 'https://github.com/NasriHoussemEddine/DevOps.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo '>>> Beginning the Build Stage: Compiling the project and skipping tests...'
+                sh "mvn clean package -DskipTests"
+                script {
+                    def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    def versionMatch = commitMessage =~ /v\d+\.\d+\.\d+/
+                    if (versionMatch) {
+                        env.VERSION = versionMatch[0]
+                    } else {
+                        error("No valid version found in commit message")
+                    }
+                    echo ">>> Extracted Project Version: ${env.VERSION}"
+                    writeFile file: 'version.txt', text: "${env.VERSION}"
+                }
+            }
+        }
+
+        stage('SonarQube') {
+            steps {
+                echo '>>> Initiating SonarQube Analysis Stage: Performing code quality checks...'
+                withCredentials([string(credentialsId: 'sonarqube2', variable: 'SONAR_TOKEN')]) {
+                    sh "mvn sonar:sonar -Dsonar.projectKey=devops_project -Dsonar.host.url=${URL_SONAR} -Dsonar.login=${SONAR_TOKEN} -Dsonar.java.binaries=target/classes"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo '>>> Starting Docker Image Build Stage: Creating the Docker image...'
+                sh "docker build -t houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION} ."
+            }
+        }
+
+        stage('Docker Login and Push to Docker Hub') {
+            steps {
+                echo '>>> Preparing to Push Docker Image: Logging into Docker Hub...'
+                script {
+                    sh "echo ${DOCKER_HUB_TOKEN} | docker login -u houssemnasri --password-stdin"
+                    sh "docker push houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                }
+            }
+        }
+    }
+
+    post {
+            success {
+                echo '>>> Sending email notification...'
+                emailext (
+                    subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                        The build was successful!
+
+                        You can trigger the Backend-CD build using the following link:
+
+                        http://admin:EmailToken@192.168.157.146:8080/job/Backend-CD/build?token=EmailToken
+
+                    """,
+                    recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+                    to: 'houssemeddinenasri@esprit.tn' // Replace with actual recipient email
+                )
+            }
+            failure {
+                echo '>>> Build failed, no email sent.'
+            }
+    }
+}

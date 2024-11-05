@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        VM_IP = '192.168.157.146'
+        VM_PORT = '8081'
+        NEXUS_DOCKER_LOGIN = "http://192.168.157.146:5000"
+        NEXUS_DOCKER_REPO = "192.168.157.146:5000/repository/docker-repo"
+        NEXUS_USERNAME = 'admin'
+        NEXUS_PASSWORD = '0000'
+    }
+
+    stages {
+        stage('Load Version') {
+            steps {
+                echo '>>> Loading Version Information: Reading the version from the CI pipeline output...'
+                script {
+                    env.VERSION = readFile('version.txt').trim()
+                    echo ">>> Successfully Loaded Version: ${env.VERSION}"
+                }
+            }
+        }
+
+        stage('Deploy Docker Image to Nexus') {
+            steps {
+                echo '>>> Deploying Docker Image: Logging into Nexus and pushing the image...'
+                script {
+                    sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_LOGIN}"
+                    sh "docker tag houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                    sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                }
+            }
+        }
+
+        stage('Remove Nexus-Tagged Docker Image') {
+            steps {
+                echo '>>> Removing Nexus-Tagged Docker Image...'
+                script {
+                    sh "docker rmi ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                }
+            }
+        }
+
+        stage('Pull Docker Image') {
+            steps {
+                echo '>>> Pulling Docker Image: Fetching the image from Docker Hub...'
+                sh "docker pull houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+            }
+        }
+    }
+}
