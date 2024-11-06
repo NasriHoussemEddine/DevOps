@@ -79,7 +79,7 @@ pipeline {
 
                     """,
                     recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']],
-                    to: 'houssemeddine.nasri@esprit.tn' // Replace with actual recipient email
+                    to: 'nhoucem44@gmail.com' // Replace with actual recipient email
                 )
             }
             failure {
