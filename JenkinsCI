@@ -33,7 +33,10 @@ pipeline {
                         error("No valid version found in commit message")
                     }
                     echo ">>> Extracted Project Version: ${env.VERSION}"
+                    // Write version to file to be shared with other pipelines
                     writeFile file: 'version.txt', text: "${env.VERSION}"
+                    // Archive version.txt for other pipelines to access
+                    archiveArtifacts artifacts: 'version.txt', allowEmptyArchive: true
                 }
             }
         }
