@@ -15,8 +15,8 @@ pipeline {
             steps {
                 echo '>>> Loading Version Information: Reading the version from the CI pipeline output...'
                 script {
-                    // Ensure the file exists by using copyArtifacts from the backendCI job
-                    copyArtifacts(projectName: 'backendCI', filter: 'version.txt', target: './')
+                    // Ensure the file exists by using copyArtifacts from the Backend-CI job
+                    copyArtifacts(projectName: 'Backend-CI', filter: 'version.txt', target: './')
                     env.VERSION = readFile('version.txt').trim()
                     echo ">>> Successfully Loaded Version: ${env.VERSION}"
                 }
