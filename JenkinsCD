@@ -13,12 +13,20 @@ pipeline {
     stages {
         stage('Load Version') {
             steps {
-                echo '>>> Loading Version Information: Reading the version from the CI pipeline output...'
+                echo '>>> Loading Version Information: Reading the version from the commit message...'
                 script {
-                    // Ensure the file exists by using copyArtifacts from the Backend-CI job
-                    copyArtifacts(projectName: 'Backend-CI', filter: 'version.txt', target: './')
-                    env.VERSION = readFile('version.txt').trim()
-                    echo ">>> Successfully Loaded Version: ${env.VERSION}"
+                    // Get the latest commit message
+                    def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                    echo ">>> Commit Message: ${commitMessage}"
+
+                    // Use regex to extract the version from the commit message
+                    def versionMatch = commitMessage =~ /v\d+\.\d+\.\d+/  // Regex to match version format like v1.2.3
+                    if (versionMatch) {
+                        env.VERSION = versionMatch[0]
+                        echo ">>> Successfully Extracted Version: ${env.VERSION}"
+                    } else {
+                        error("No valid version found in commit message")
+                    }
                 }
             }
         }
