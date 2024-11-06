@@ -72,7 +72,7 @@ pipeline {
         success {
             echo '>>> Build successful, sending email notification...'
             emailext (
-                subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "Build Successful",
                 body: """
                     The build was successful!
 
@@ -81,27 +81,14 @@ pipeline {
                     http://admin:EmailToken@192.168.157.146:8080/job/Backend-CD/build?token=EmailToken
                 """,
                 recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']],
-                to: 'nhoucem44@gmail.com' // Replace with actual recipient email
+                from: 'sabrinetteissaoui27@gmail.com',
+                to: 'nhoucem44@gmail.com'
             )
         }
         failure {
             echo '>>> Build failed, no email sent.'
-            // Optional: Add failure-specific email if needed
         }
-        unstable {
-            echo '>>> Build unstable, sending email notification...'
-            emailext (
-                subject: "Build Unstable: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    The build is unstable!
 
-                    You can check the status and logs at:
-
-                    ${env.BUILD_URL}
-                """,
-                recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']],
-                to: 'nhoucem44@gmail.com' // Replace with actual recipient email
-            )
-        }
     }
+
 }
