@@ -2,60 +2,36 @@ pipeline {
     agent any
 
     environment {
-        VM_IP = '192.168.157.146'
-        VM_PORT = '8081'
-        NEXUS_DOCKER_LOGIN = "http://192.168.157.146:5000"
-        NEXUS_DOCKER_REPO = "192.168.157.146:5000/repository/docker-repo"
-        NEXUS_USERNAME = 'admin'
-        NEXUS_PASSWORD = '0000'
+        KUBECONFIG = "/var/lib/jenkins/.kube/config" // Replace with the path to your kubeconfig
     }
 
     stages {
-        stage('Load Version') {
+
+        stage('GIT') {
             steps {
-                echo '>>> Loading Version Information: Reading the version from the commit message...'
                 script {
-                    // Get the latest commit message
-                    def commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
-                    echo ">>> Commit Message: ${commitMessage}"
-
-                    // Use regex to extract the version from the commit message
-                    def versionMatch = commitMessage =~ /v\d+\.\d+\.\d+/  // Regex to match version format like v1.2.3
-                    if (versionMatch) {
-                        env.VERSION = versionMatch[0]
-                        echo ">>> Successfully Extracted Version: ${env.VERSION}"
-                    } else {
-                        error("No valid version found in commit message")
-                    }
+                    cleanWs()
                 }
+                git branch: 'main',
+                url: 'https://github.com/NasriHoussemEddine/DevOps.git',
+                  }
+            }
+
+        stage('Deploy Database') {
+            steps {
+                echo "Applying Database YAML..."
+                sh 'minikube kubectl -- apply -f db.yaml'
             }
         }
 
-        stage('Deploy Docker Image to Nexus') {
+        stage('Deploy Backend App') {
             steps {
-                echo '>>> Deploying Docker Image: Logging into Nexus and pushing the image...'
-                script {
-                    sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_LOGIN}"
-                    sh "docker tag houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
-                    sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
-                }
+                echo "Deploying Backend Application..."
+                sh 'minikube kubectl -- apply -f spring.yaml'
             }
         }
 
-        stage('Remove Nexus-Tagged Docker Image') {
-            steps {
-                echo '>>> Removing Nexus-Tagged Docker Image...'
-                script {
-                    sh "docker rmi ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
-                }
-            }
-        }
+        
 
-        stage('Pull Docker Image') {
-            steps {
-                echo '>>> Pulling Docker Image: Fetching the image from Docker Hub...'
-                sh "docker pull houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
-            }
-        }
     }
 }

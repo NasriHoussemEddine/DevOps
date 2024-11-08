@@ -10,6 +10,12 @@ pipeline {
         GITHUB_TOKEN = credentials('token2')
         SONAR_TOKEN = credentials('sonarqube2')
         URL_SONAR = 'http://192.168.157.146:9000'
+        VM_IP = '192.168.157.146'
+        VM_PORT = '8081'
+        NEXUS_DOCKER_LOGIN = "http://192.168.157.146:5000"
+        NEXUS_DOCKER_REPO = "192.168.157.146:5000/repository/docker-repo"
+        NEXUS_USERNAME = 'admin'
+        NEXUS_PASSWORD = '0000'
     }
 
     stages {
@@ -62,6 +68,33 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Docker Image to Nexus') {
+                    steps {
+                        echo '>>> Deploying Docker Image: Logging into Nexus and pushing the image...'
+                        script {
+                            sh "echo ${NEXUS_PASSWORD} | docker login -u ${NEXUS_USERNAME} --password-stdin ${NEXUS_DOCKER_LOGIN}"
+                            sh "docker tag houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION} ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                            sh "docker push ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                        }
+                    }
+                }
+
+                stage('Remove Nexus-Tagged Docker Image') {
+                    steps {
+                        echo '>>> Removing Nexus-Tagged Docker Image...'
+                        script {
+                            sh "docker rmi ${NEXUS_DOCKER_REPO}/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                        }
+                    }
+                }
+
+                stage('Pull Docker Image') {
+                    steps {
+                        echo '>>> Pulling Docker Image: Fetching the image from Docker Hub...'
+                        sh "docker pull houssemnasri/houssemnasri-4carctic-g1-tpachatproject-backend:${env.VERSION}"
+                    }
+                }
     }
 
     post {
@@ -70,7 +103,7 @@ pipeline {
             emailext (
                 subject: "Build Successful",
                 body: """
-                    The build was successful!
+                    The build of the Backend-CI was successful!
 
                     You can trigger the Backend-CD build using the following link:
 

@@ -17,23 +17,23 @@
 	<description>tpAchatProject</description>
 	<version>1.0.0</version>
 
-	<properties>
-		<java.version>1.8</java.version>
-		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
-		<vm.ip>${vm.ip}</vm.ip>
-		<vm.port>${vm.port}</vm.port>
-	</properties>
+<!--	<properties>-->
+<!--		<java.version>1.8</java.version>-->
+<!--		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>-->
+<!--		<vm.ip>${vm.ip}</vm.ip>-->
+<!--		<vm.port>${vm.port}</vm.port>-->
+<!--	</properties>-->
 
-	<distributionManagement>
-		<repository>
-			<id>nexus-releases-houcem</id>
-			<url>http://${vm.ip}:${vm.port}/repository/nexus-releases-houcem/</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus-snapshots-houcem</id>
-			<url>http://${vm.ip}:${vm.port}/repository/nexus-snapshots-houcem/</url>
-		</snapshotRepository>
-	</distributionManagement>
+<!--	<distributionManagement>-->
+<!--		<repository>-->
+<!--			<id>nexus-releases-houcem</id>-->
+<!--			<url>http://${vm.ip}:${vm.port}/repository/nexus-releases-houcem/</url>-->
+<!--		</repository>-->
+<!--		<snapshotRepository>-->
+<!--			<id>nexus-snapshots-houcem</id>-->
+<!--			<url>http://${vm.ip}:${vm.port}/repository/nexus-snapshots-houcem/</url>-->
+<!--		</snapshotRepository>-->
+<!--	</distributionManagement>-->
 
 	<build>
 		<finalName>4Arctic-G1-projetdevops3</finalName>
@@ -112,4 +112,22 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<spring.profiles.active>dev</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<spring.profiles.active>prod</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
 </project>
